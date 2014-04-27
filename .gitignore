@@ -1,0 +1,11 @@
+Library/
+Builds/
+Temp/
+*.sln
+*.userprefs
+*.csproj
+*.pidb
+*.meta
+*.DS_Store
+.DS_Store
+Assets/NonFreeGUISkin/
