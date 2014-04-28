@@ -23,8 +23,11 @@ public class Gamestate : MonoBehaviour {
 	int lastDrawingPlayer;
 	float nextRoundCountdown;
 
+	ArrayList wordsWeHadAlready;
+
 	void Start ()
 	{
+		wordsWeHadAlready = new ArrayList();
 		playersWhoGotIt = "";
 	}
 
@@ -49,12 +52,26 @@ public class Gamestate : MonoBehaviour {
 		}
 	}
 
-	string getRandomWord()
+	public string getRandomWord()
 	{
 
-		TextAsset text = Resources.Load("words") as TextAsset;
-		string[] words = text.text.Split('\n');
-		return words[ Random.Range(0, words.Length) ];
+		bool done = false;
+		string word = "";
+
+		while(!done) {
+			TextAsset text = Resources.Load("words") as TextAsset;
+			string[] words = text.text.Split('\n');
+			word = words[ Random.Range(0, words.Length) ];
+
+			if(!wordsWeHadAlready.Contains(word))
+				done = true;
+		}
+
+		wordsWeHadAlready.Add(word);
+		if(wordsWeHadAlready.Count > 50)
+			wordsWeHadAlready.RemoveAt(0);
+
+		return word;
 
 	}
 

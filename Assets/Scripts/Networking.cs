@@ -29,6 +29,8 @@ public class Networking : MonoBehaviour {
 
 	void Start () {
 
+		Application.targetFrameRate = 30;
+
 		MasterServer.ipAddress = "teamspeak.jancc.de";
 		MasterServer.port = 23466;
 		Network.natFacilitatorIP = "teamspeak.jancc.de";

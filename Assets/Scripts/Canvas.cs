@@ -58,16 +58,16 @@ public class Canvas : MonoBehaviour {
 		Vector2 from = new Vector2(x1, y1);
 		Vector2 to = new Vector2(x2, y2);
 		Vector2 dir = to - from;
-		if(dir.magnitude < 1.0f) {
+		if(x1 == x2 && y1 == y2) {
 			canvas.SetPixel(Mathf.RoundToInt(from.x), Mathf.RoundToInt(from.y), color);
 			didChange = true;
 			return;
 		}
 
 		dir.Normalize();
-		dir *= 0.5f;
+		dir *= 0.25f;
 
-		while(Vector2.Distance(from, to) > 1.0f) {
+		while(Vector2.Distance(from, to) > 0.5f) {
 
 			from += dir;
 			canvas.SetPixel(Mathf.RoundToInt(from.x), Mathf.RoundToInt(from.y), color);
