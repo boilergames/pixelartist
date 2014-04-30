@@ -22,6 +22,8 @@ public class Networking : MonoBehaviour {
 	public string selectedGUID;
 	public string joinPassword;
 
+	public string searchCriteria = "";
+
 	public Gamestate instantiatedGamestate;
 	public Player myPlayer;
 
@@ -75,22 +77,27 @@ public class Networking : MonoBehaviour {
 		}
 		else if(listServers)
 		{
+			GUILayout.Label("Filter:");
+			searchCriteria = GUILayout.TextField(searchCriteria);
+
 			foreach(HostData host in MasterServer.PollHostList())
 			{
-				GUILayout.Label(host.gameName + " " + host.connectedPlayers.ToString() + "/" + host.playerLimit.ToString());
-				if(host.passwordProtected) {
-					GUILayout.Label("Password Protected Game");
-					if(GUILayout.Button("Join"))
-					{
-						selectedGUID = host.guid;
-						enterPassword = true;
+				if(searchCriteria == "" || host.gameName.StartsWith(searchCriteria)) {
+					GUILayout.Label(host.gameName + " " + host.connectedPlayers.ToString() + "/" + host.playerLimit.ToString());
+					if(host.passwordProtected) {
+						GUILayout.Label("Password Protected Game");
+						if(GUILayout.Button("Join"))
+						{
+							selectedGUID = host.guid;
+							enterPassword = true;
+						}
 					}
-				}
-				else {
-					if(GUILayout.Button("Join"))
-					{
-						listServers = false;
-						Connect(host.guid);
+					else {
+						if(GUILayout.Button("Join"))
+						{
+							listServers = false;
+							Connect(host.guid);
+						}
 					}
 				}
 			}
