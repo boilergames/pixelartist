@@ -10,9 +10,12 @@ public class Player : MonoBehaviour {
 	public int score;
 	public Gamestate gamestate;
 
-	public Color[] definedColors;
-	public string[] definedColorNames;
-	public int selectedDrawColor;
+    public Texture2D colorwheel;
+    public Texture2D colorwheelSelector;
+    public float colorBrightness;
+    public Color selectedColor;
+    Rect colorwheelPos;
+    Vector2 selectorPos;
 
 	public string chatMessage;
 	public string connected;
@@ -22,6 +25,7 @@ public class Player : MonoBehaviour {
 
 	bool requestChatMessage;
 	float chatMessageTimer;
+    public bool showConnected;
 
 	public Vector2 lastMousePos;
 	public Vector2 curMousePos;
@@ -68,25 +72,24 @@ public class Player : MonoBehaviour {
 	}
 
 	public static Player FindWithName(string searchName) {
-		
+
 		GameObject[] playerGOs = GameObject.FindGameObjectsWithTag("Player");
-		
+
 		for(int i = 0; i < playerGOs.Length; i++)
 		{
 			Player player = playerGOs[i].GetComponent<Player>();
 			if(player.myName == searchName) {
 				return player;
 			}
-			
 		}
-		
+
 		return null;
-		
+
 	}
 
 	// Update is called once per frame
 	void FixedUpdate () {
-	
+
 		if(!networkView.isMine)
 			return;
 
@@ -107,17 +110,23 @@ public class Player : MonoBehaviour {
 		{
 			if(Input.GetMouseButton(0))
 			{
-				SetPixel(x1,y1,x2,y2,definedColors[selectedDrawColor]);
+				SetPixel(x1,y1,x2,y2,selectedColor * colorBrightness);
 			}
 			if(Input.GetMouseButton(1))
 			{
-				float mod = Random.Range(0.98f, 1.0f);
-				Color clearColor = new Color(mod, mod, mod);
-				SetPixel(x1,y1,x2,y2,clearColor);
+				SetPixel(x1,y1,x2,y2,Color.white);
 			}
 		}
 
-		if(nextPlayerUpdate < Time.time)
+        Vector2 mouseMod = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+        if(Input.GetMouseButton(0) && colorwheelPos.Contains(mouseMod)) {
+            selectorPos = mouseMod;
+            int x = Mathf.RoundToInt(mouseMod.x - colorwheelPos.x);
+            int y = Mathf.RoundToInt(128.0f - mouseMod.y - colorwheelPos.y);
+            selectedColor = colorwheel.GetPixel(x,y);
+        }
+
+		if(Input.GetKeyDown(KeyCode.LeftControl))
 		{
 			GameObject[] playerGOs = GameObject.FindGameObjectsWithTag("Player");
 			if(/*playerGOs.Length != lastPlayerNumber*/true)
@@ -133,8 +142,9 @@ public class Player : MonoBehaviour {
 
 				lastPlayerNumber = playerGOs.Length;
 			}
-			nextPlayerUpdate = Time.time + playerUpdateFrequency;
 		}
+
+        showConnected = Input.GetKey(KeyCode.LeftControl);
 
 		if(chatMessageTimer >= 0.0f)
 			chatMessageTimer -= Time.deltaTime;
@@ -160,9 +170,9 @@ public class Player : MonoBehaviour {
 
 		if(gamestate.inRound && gamestate.currentNetworkPlayer == Network.player)
 			networkView.RPC("SetPixelRPC", RPCMode.All, x1,y1,x2,y2,color.r,color.g,color.b);
-		
+
 	}
-	
+
 	[RPC]
 	void SetPixelRPC (int x1, int y1, int x2, int y2, float r, float g, float b) {
 
@@ -175,12 +185,12 @@ public class Player : MonoBehaviour {
 
 		if(gamestate.inRound && gamestate.currentNetworkPlayer == Network.player)
 			networkView.RPC("CleanCanvasRPC", RPCMode.All);
-		
+
 	}
-	
+
 	[RPC]
 	void CleanCanvasRPC () {
-		
+
 		canvas.Cleanup();
 
 	}
@@ -188,7 +198,7 @@ public class Player : MonoBehaviour {
 	public void SetName (string newName) {
 
 		networkView.RPC("SetNameRPC", RPCMode.AllBuffered, newName);
-		
+
 	}
 
 	[RPC]
@@ -239,7 +249,7 @@ public class Player : MonoBehaviour {
 		}
 
 		networkView.RPC("PostMessageRPC", RPCMode.All, message, sender, anonymously, allowRTF, visibleOnlyToSender);
-		
+
 	}
 
 	[RPC]
@@ -300,6 +310,47 @@ public class Player : MonoBehaviour {
 
 	}
 
+    void DoRegularSidebar (Rect menuPos) {
+        GUILayout.Label(colorwheel, GUILayout.Height(128.0f));
+        colorBrightness = GUILayout.HorizontalSlider(colorBrightness, 0.0f, 1.0f);
+        colorwheelPos = menuPos;
+        colorwheelPos.height = 128.0f;
+        colorwheelPos.width = 128.0f;
+
+        GUILayout.Label("Brightness: " + Mathf.Round(colorBrightness * 100.0f).ToString() + "%");
+
+        if(GUILayout.Button ("Cleanup"))
+            CleanCanvas();
+
+        if(gamestate.currentPlayer == this && gamestate.inRound) {
+
+            GUILayout.Label("Your word: " + gamestate.currentWord);
+            float percentage = gamestate.timeLeft / gamestate.roundLength;
+            GUILayoutOption width = GUILayout.Width( menuPos.width * percentage );
+            GUI.color = Color.Lerp(Color.red, Color.green, percentage);
+            GUILayout.Box (Mathf.RoundToInt(gamestate.timeLeft).ToString() + "s", width);
+            GUI.color = Color.white;
+
+        }
+
+        GUILayout.FlexibleSpace();
+
+        //GUILayout.Label(connected);
+
+        if(Network.isServer) {
+            if(GUILayout.Button ("Close Server"))
+                Network.Disconnect();
+        }
+        else {
+            if(GUILayout.Button ("Disconnect"))
+                Network.Disconnect();
+        }
+    }
+
+    void DoPlayerList () {
+        GUILayout.Label(connected);
+    }
+
 	void OnGUI () {
 
 		if(!networkView.isMine)
@@ -309,44 +360,27 @@ public class Player : MonoBehaviour {
 
 		if(Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return &&
 		   GUI.GetNameOfFocusedControl() == "Chatfield") {
-			
+
 			requestChatMessage = true;
-			
+
 		}
 
-		Rect menuPos = new Rect(Screen.height * (96.0f / 64.0f), 0, Screen.width - Screen.height * (96.0f / 64.0f), Screen.height - 256);
+        Rect menuPos = new Rect(Screen.height * (96.0f / 64.0f), 0, Screen.width - Screen.height * (96.0f / 64.0f), Screen.height - 256);
 
 		GUILayout.BeginArea(menuPos);
-		selectedDrawColor = GUILayout.SelectionGrid(selectedDrawColor, definedColorNames, 3);
 
-		if(GUILayout.Button ("Cleanup"))
-			CleanCanvas();
-
-		if(gamestate.currentPlayer == this && gamestate.inRound) {
-
-			GUILayout.Label("Your word: " + gamestate.currentWord);
-			float percentage = gamestate.timeLeft / gamestate.roundLength;
-			GUILayoutOption width = GUILayout.Width( menuPos.width * percentage );
-			GUI.color = Color.Lerp(Color.red, Color.green, percentage);
-			GUILayout.Box (Mathf.RoundToInt(gamestate.timeLeft).ToString() + "s", width);
-			GUI.color = Color.white;
-
-		}
-
-		GUILayout.FlexibleSpace();
-
-		GUILayout.Label(connected);
-
-		if(Network.isServer) {
-			if(GUILayout.Button ("Close Server"))
-				Network.Disconnect();
-		}
-		else {
-			if(GUILayout.Button ("Disconnect"))
-				Network.Disconnect();
-		}
+        if(!showConnected) {
+            DoRegularSidebar(menuPos);
+        }
+        else {
+            DoPlayerList();
+        }
 
 		GUILayout.EndArea();
+
+        if(!showConnected) {
+            GUI.DrawTexture(new Rect(selectorPos.x - 8.0f, selectorPos.y - 8.0f, 16.0f, 16.0f), colorwheelSelector);
+        }
 
 		GUI.Box (new Rect(menuPos.x, Screen.height - 256, menuPos.width, 256 - 24), "");
 
@@ -368,7 +402,6 @@ public class Player : MonoBehaviour {
 		{
 			PostChatMessage();
 		}
-	
 	}
 
 }
