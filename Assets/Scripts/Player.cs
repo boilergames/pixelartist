@@ -88,7 +88,7 @@ public class Player : MonoBehaviour {
 	}
 
 	// Update is called once per frame
-	void FixedUpdate () {
+	void Update () {
 
 		if(!networkView.isMine)
 			return;
@@ -108,21 +108,27 @@ public class Player : MonoBehaviour {
 
 		if(!(x1 > 95 || y1 > 63 || x1 < 0 || y1 < 0))
 		{
-			if(Input.GetMouseButton(0))
+            if(Input.GetMouseButtonDown(0) && Input.GetKey(KeyCode.LeftShift)) {
+                FloodFill(x1, y1, selectedColor * colorBrightness);
+            }
+            else if(Input.GetMouseButtonDown(1) && Input.GetKey(KeyCode.LeftShift)) {
+                FloodFill(x1, y1, Color.white);
+            }
+			else if(Input.GetMouseButton(0))
 			{
-				SetPixel(x1,y1,x2,y2,selectedColor * colorBrightness);
+                SetPixel(x1,y1,x2,y2,selectedColor * colorBrightness);
 			}
-			if(Input.GetMouseButton(1))
+			else if(Input.GetMouseButton(1))
 			{
-				SetPixel(x1,y1,x2,y2,Color.white);
+                SetPixel(x1,y1,x2,y2,Color.white);
 			}
 		}
 
         Vector2 mouseMod = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
         if(Input.GetMouseButton(0) && colorwheelPos.Contains(mouseMod)) {
             selectorPos = mouseMod;
-            int x = Mathf.RoundToInt(mouseMod.x - colorwheelPos.x);
-            int y = Mathf.RoundToInt(128.0f - mouseMod.y - colorwheelPos.y);
+            int x = Mathf.RoundToInt((mouseMod.x - colorwheelPos.x) / colorwheelPos.width * 512.0f);
+            int y = Mathf.RoundToInt((colorwheelPos.height - mouseMod.y - colorwheelPos.y) / colorwheelPos.height * 512.0f);
             selectedColor = colorwheel.GetPixel(x,y);
         }
 
@@ -166,7 +172,30 @@ public class Player : MonoBehaviour {
 		chatMessageTimer = 1.0f;
 	}
 
+    void FloodFill (int x, int y, Color color) {
+
+#if UNITY_EDITOR
+        canvas.FloodFill(x,y,color.r,color.g,color.b);
+#endif
+
+        if(gamestate.inRound && gamestate.currentNetworkPlayer == Network.player)
+            networkView.RPC("FloodFillRPC", RPCMode.All, x,y,color.r,color.g,color.b);
+
+    }
+
+    [RPC]
+    void FloodFillRPC (int x, int y, float r, float g, float b) {
+
+        if(gamestate.currentNetworkPlayer == Network.player);
+            canvas.FloodFill(x,y,r,g,b);
+
+    }
+
 	void SetPixel (int x1, int y1, int x2, int y2, Color color) {
+
+#if UNITY_EDITOR
+        canvas.SetPixel(x1,y1,x2,y2,color.r,color.g,color.b);
+#endif
 
 		if(gamestate.inRound && gamestate.currentNetworkPlayer == Network.player)
 			networkView.RPC("SetPixelRPC", RPCMode.All, x1,y1,x2,y2,color.r,color.g,color.b);
@@ -182,6 +211,10 @@ public class Player : MonoBehaviour {
 	}
 
 	void CleanCanvas () {
+
+#if UNITY_EDITOR
+        canvas.Cleanup();
+#endif
 
 		if(gamestate.inRound && gamestate.currentNetworkPlayer == Network.player)
 			networkView.RPC("CleanCanvasRPC", RPCMode.All);
@@ -311,13 +344,16 @@ public class Player : MonoBehaviour {
 	}
 
     void DoRegularSidebar (Rect menuPos) {
-        GUILayout.Label(colorwheel, GUILayout.Height(128.0f));
+        GUILayout.Label(colorwheel, GUILayout.Height(160.0f));
         colorBrightness = GUILayout.HorizontalSlider(colorBrightness, 0.0f, 1.0f);
         colorwheelPos = menuPos;
-        colorwheelPos.height = 128.0f;
-        colorwheelPos.width = 128.0f;
 
+        colorwheelPos.height = 160.0f;
+        colorwheelPos.width = 160.0f;
+
+        GUI.color = selectedColor * colorBrightness + new Color(0.0f, 0.0f, 0.0f, 1.0f);
         GUILayout.Label("Brightness: " + Mathf.Round(colorBrightness * 100.0f).ToString() + "%");
+        GUI.color = Color.white;
 
         if(GUILayout.Button ("Cleanup"))
             CleanCanvas();
