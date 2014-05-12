@@ -12,6 +12,7 @@ public class Player : MonoBehaviour {
 
     public Texture2D colorwheel;
     public Texture2D colorwheelSelector;
+    public Texture2D blackOverlay;
     public float colorBrightness;
     public Color selectedColor;
     Rect colorwheelPos;
@@ -344,12 +345,16 @@ public class Player : MonoBehaviour {
 	}
 
     void DoRegularSidebar (Rect menuPos) {
-        GUILayout.Label(colorwheel, GUILayout.Height(160.0f));
-        colorBrightness = GUILayout.HorizontalSlider(colorBrightness, 0.0f, 1.0f);
+        GUILayout.Label(colorwheel, GUI.skin.GetStyle("Colorwheel"), GUILayout.Height(160.0f));
         colorwheelPos = menuPos;
-
         colorwheelPos.height = 160.0f;
         colorwheelPos.width = 160.0f;
+        colorwheelPos.x = Screen.width - colorwheelPos.width;
+        colorBrightness = GUI.VerticalSlider(new Rect(colorwheelPos.x - menuPos.x - 24.0f, 0, 24.0f, 160.0f), colorBrightness, 1.0f, 0.0f);
+
+        GUI.color = new Color(GUI.color.r, GUI.color.g, GUI.color.b, 1.0f - colorBrightness);
+        GUI.DrawTexture(new Rect(colorwheelPos.x - menuPos.x, 0, colorwheelPos.width, colorwheelPos.height), blackOverlay);
+        GUI.color = Color.white;
 
         GUI.color = selectedColor * colorBrightness + new Color(0.0f, 0.0f, 0.0f, 1.0f);
         GUILayout.Label("Brightness: " + Mathf.Round(colorBrightness * 100.0f).ToString() + "%");
