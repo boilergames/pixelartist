@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -60,8 +61,8 @@ public class Gamestate : MonoBehaviour {
 
 		while(!done) {
 			TextAsset text = Resources.Load("words") as TextAsset;
-			string[] words = text.text.Split('\n');
-			word = words[ Random.Range(0, words.Length) ];
+			string[] words = text.text.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
+			word = words[ UnityEngine.Random.Range(0, words.Length) ];
 
 			if(!wordsWeHadAlready.Contains(word))
 				done = true;

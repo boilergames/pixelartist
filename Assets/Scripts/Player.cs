@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Text;
 
 public class Player : MonoBehaviour {
 
@@ -292,7 +293,11 @@ public class Player : MonoBehaviour {
 			if(gamestate.currentNetworkPlayer == sender && !anonymously)
 				return;
 
-			if(message.ToLower() == gamestate.currentWord)
+			byte[] guessBytes = Encoding.Default.GetBytes(message);
+			string guess = Encoding.ASCII.GetString(guessBytes);
+			byte[] answerBytes = Encoding.Default.GetBytes(gamestate.currentWord);
+			string answer = Encoding.ASCII.GetString(answerBytes);
+			if(guess == answer)
 			{
 				if(Network.isServer)
 				{
