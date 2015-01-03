@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Canvas : MonoBehaviour {
+public class PixelArtistCanvas : MonoBehaviour {
 
 	Texture2D canvas;
 	public Texture2D logo;
@@ -49,11 +49,8 @@ public class Canvas : MonoBehaviour {
 		canvas = new Texture2D(96, 64);
 		canvas.filterMode = FilterMode.Point;
 
-		Color cleanColor = new Color(0.98f, 0.98f, 0.98f);
-
 		for(int y = 0; y < 64; y++) {
 			for(int x = 0; x < 96; x++) {
-				float mod = Random.Range(0.0f, 0.02f);
 				canvas.SetPixel(x, y, Color.white);
 			}
 		}

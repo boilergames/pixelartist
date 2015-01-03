@@ -5,7 +5,7 @@ public class Player : MonoBehaviour {
 
 	public GUISkin skin;
 
-	public Canvas canvas;
+	public PixelArtistCanvas canvas;
 	public string myName;
 	public int score;
 	public Gamestate gamestate;
@@ -38,7 +38,7 @@ public class Player : MonoBehaviour {
 		gamestate = gamestateGO.GetComponent<Gamestate>();
 
 		GameObject canvasGO = GameObject.FindGameObjectWithTag("MainCamera");
-		canvas = canvasGO.GetComponent<Canvas>();
+		canvas = canvasGO.GetComponent<PixelArtistCanvas>();
 
 		if(!networkView.isMine)
 			return;
@@ -187,8 +187,7 @@ public class Player : MonoBehaviour {
     [RPC]
     void FloodFillRPC (int x, int y, float r, float g, float b) {
 
-        if(gamestate.currentNetworkPlayer == Network.player);
-            canvas.FloodFill(x,y,r,g,b);
+		canvas.FloodFill(x, y, r, g, b);
 
     }
 
@@ -206,8 +205,7 @@ public class Player : MonoBehaviour {
 	[RPC]
 	void SetPixelRPC (int x1, int y1, int x2, int y2, float r, float g, float b) {
 
-		if(gamestate.currentNetworkPlayer == Network.player);
-			canvas.SetPixel(x1,y1,x2,y2,r,g,b);
+		canvas.SetPixel(x1, y1, x2, y2, r, g, b);
 
 	}
 

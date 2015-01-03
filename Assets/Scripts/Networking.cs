@@ -7,7 +7,7 @@ public class Networking : MonoBehaviour {
 	public GUISkin skin;
 	public GameObject player;
 	public GameObject gamestate;
-	public Canvas canvas;
+	public PixelArtistCanvas canvas;
 	public bool connected;
 	public bool waiting;
 	public bool enterPassword;
@@ -29,15 +29,21 @@ public class Networking : MonoBehaviour {
 
 	public Vector2 scroll;
 
-	void Start () {
+	public bool useBoilersMasterserver = false;
+	public string masterServerIp = "unitymaster.boilergames.com";
+	public int masterServerPort = 23466;
+	public int natPort = 50005;
 
+	void Start () {
 		Application.targetFrameRate = 30;
 
-		MasterServer.ipAddress = "teamspeak.jancc.de";
-		MasterServer.port = 23466;
-		Network.natFacilitatorIP = "teamspeak.jancc.de";
-		Network.natFacilitatorPort = 50005;
-
+		if (useBoilersMasterserver) {
+			MasterServer.ipAddress = masterServerIp;
+			MasterServer.port = masterServerPort;
+			Network.natFacilitatorIP = masterServerIp;
+			Network.natFacilitatorPort = natPort;
+		}
+		
 		if(PlayerPrefs.HasKey("username"))
 			username = PlayerPrefs.GetString("username");
 		else
@@ -47,7 +53,6 @@ public class Networking : MonoBehaviour {
 		serverPassword = "";
 		serverRoundLength = 60.0f;
 		serverPlayerCount = 8;
-
 	}
 
 	void OnGUI () {
@@ -116,7 +121,7 @@ public class Networking : MonoBehaviour {
 
 			if(GUILayout.Button("Find Games"))
 			{
-				MasterServer.RequestHostList("pixelartist" + gameVersionID);
+				MasterServer.RequestHostList("boiler_pixelartist" + gameVersionID);
 				listServers = true;
 			}
 
@@ -143,8 +148,8 @@ public class Networking : MonoBehaviour {
 
 		GUILayout.FlexibleSpace();
 
-		GUILayout.Label("Written and Directed by:\n" +
-		                "Bernd Sawyer");
+		GUILayout.Label("Copyright 2014 - 2015\n" +
+		                "Boiler Games");
 
 		GUILayout.EndScrollView();
 		GUILayout.EndArea();
@@ -157,7 +162,7 @@ public class Networking : MonoBehaviour {
 		Network.incomingPassword = serverPassword;
 		Network.InitializeServer(serverPlayerCount, port, true);
 
-		MasterServer.RegisterHost("pixelartist" + gameVersionID, username + "'s game");
+		MasterServer.RegisterHost("boiler_pixelartist" + gameVersionID, username + "'s game");
 		waiting = true;
 
 	}
