@@ -19,5 +19,4 @@ Installation
 ------------
 
 The repo includes all source files that are needed to build a working copy of the game in
-Unity. However it is missing the GUI Skin, because I don't know if I can redistribute it. 
-The game still works flawlessly however.
+Unity.
