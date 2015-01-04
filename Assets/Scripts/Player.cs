@@ -98,12 +98,16 @@ public class Player : MonoBehaviour {
 		lastMousePos = curMousePos;
 		curMousePos = Input.mousePosition;
 
-		double fx1 = curMousePos.x / (Screen.width * (0.75));
+		//0.75
+		double canvasWidth = (Screen.height / 64.0) * 95.0;
+		double horizontalCanvasArea = canvasWidth / Screen.width;
+
+		double fx1 = curMousePos.x / (Screen.width * (horizontalCanvasArea));
 		double fy1 = curMousePos.y / Screen.height;
 		int x1 = Mathf.RoundToInt((float)(fx1 * 95.0));
 		int y1 = Mathf.RoundToInt((float)(fy1 * 64.0));
 
-		double fx2 = lastMousePos.x / (Screen.width * (0.75));
+		double fx2 = lastMousePos.x / (Screen.width * (horizontalCanvasArea));
 		double fy2 = lastMousePos.y / Screen.height;
 		int x2 = Mathf.RoundToInt((float)(fx2 * 95.0));
 		int y2 = Mathf.RoundToInt((float)(fy2 * 64.0));
