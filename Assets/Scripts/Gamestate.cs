@@ -123,7 +123,7 @@ public class Gamestate : MonoBehaviour {
 				if(lastDrawingPlayer > playerGOs.Length - 1)
 					lastDrawingPlayer = 0;
 				Player player = playerGOs[lastDrawingPlayer].GetComponent<Player>();
-				BeginRound(player.networkView.viewID.owner, player.networkView.viewID, getRandomWord());
+				BeginRound(player.GetComponent<NetworkView>().viewID.owner, player.GetComponent<NetworkView>().viewID, getRandomWord());
 
 			}
 
@@ -133,7 +133,7 @@ public class Gamestate : MonoBehaviour {
 	}
 
 	public void SetInfo(float newRoundLength) {
-		networkView.RPC ("SetInfoRPC", RPCMode.AllBuffered, newRoundLength);
+		GetComponent<NetworkView>().RPC ("SetInfoRPC", RPCMode.AllBuffered, newRoundLength);
 	}
 
 	[RPC]
@@ -144,7 +144,7 @@ public class Gamestate : MonoBehaviour {
 	public void BeginRound (NetworkPlayer player, NetworkViewID viewId, string word)
 	{
 
-		networkView.RPC("BeginRoundRPC", RPCMode.All, player, viewId, word);
+		GetComponent<NetworkView>().RPC("BeginRoundRPC", RPCMode.All, player, viewId, word);
 
 	}
 
@@ -174,7 +174,7 @@ public class Gamestate : MonoBehaviour {
 	public void EndRound ()
 	{
 		
-		networkView.RPC("EndRoundRPC", RPCMode.All);
+		GetComponent<NetworkView>().RPC("EndRoundRPC", RPCMode.All);
 		
 	}
 	

@@ -41,7 +41,7 @@ public class Player : MonoBehaviour {
 		GameObject canvasGO = GameObject.FindGameObjectWithTag("MainCamera");
 		canvas = canvasGO.GetComponent<PixelArtistCanvas>();
 
-		if(!networkView.isMine)
+		if(!GetComponent<NetworkView>().isMine)
 			return;
 
 		gamestate.chat = new string[gamestate.chat_max_count];
@@ -63,7 +63,7 @@ public class Player : MonoBehaviour {
 		for(int i = 0; i < playerGOs.Length; i++)
 		{
 			Player player = playerGOs[i].GetComponent<Player>();
-			if(player.networkView.viewID.owner == nplayer) {
+			if(player.GetComponent<NetworkView>().viewID.owner == nplayer) {
 				return player;
 			}
 
@@ -92,7 +92,7 @@ public class Player : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-		if(!networkView.isMine)
+		if(!GetComponent<NetworkView>().isMine)
 			return;
 
 		lastMousePos = curMousePos;
@@ -185,7 +185,7 @@ public class Player : MonoBehaviour {
 #endif
 
         if(gamestate.inRound && gamestate.currentNetworkPlayer == Network.player)
-            networkView.RPC("FloodFillRPC", RPCMode.All, x,y,color.r,color.g,color.b);
+            GetComponent<NetworkView>().RPC("FloodFillRPC", RPCMode.All, x,y,color.r,color.g,color.b);
 
     }
 
@@ -203,7 +203,7 @@ public class Player : MonoBehaviour {
 #endif
 
 		if(gamestate.inRound && gamestate.currentNetworkPlayer == Network.player)
-			networkView.RPC("SetPixelRPC", RPCMode.All, x1,y1,x2,y2,color.r,color.g,color.b);
+			GetComponent<NetworkView>().RPC("SetPixelRPC", RPCMode.All, x1,y1,x2,y2,color.r,color.g,color.b);
 
 	}
 
@@ -221,7 +221,7 @@ public class Player : MonoBehaviour {
 #endif
 
 		if(gamestate.inRound && gamestate.currentNetworkPlayer == Network.player)
-			networkView.RPC("CleanCanvasRPC", RPCMode.All);
+			GetComponent<NetworkView>().RPC("CleanCanvasRPC", RPCMode.All);
 
 	}
 
@@ -234,7 +234,7 @@ public class Player : MonoBehaviour {
 
 	public void SetName (string newName) {
 
-		networkView.RPC("SetNameRPC", RPCMode.AllBuffered, newName);
+		GetComponent<NetworkView>().RPC("SetNameRPC", RPCMode.AllBuffered, newName);
 
 	}
 
@@ -257,7 +257,7 @@ public class Player : MonoBehaviour {
 
 	public void AddScore (int added) {
 
-		networkView.RPC("AddScoreRPC", RPCMode.AllBuffered, added);
+		GetComponent<NetworkView>().RPC("AddScoreRPC", RPCMode.AllBuffered, added);
 
 	}
 
@@ -278,14 +278,14 @@ public class Player : MonoBehaviour {
 				Player player = Player.FindWithName(message);
 				if(!player)
 					return;
-				Network.CloseConnection(player.networkView.viewID.owner, true);
+				Network.CloseConnection(player.GetComponent<NetworkView>().viewID.owner, true);
 				return;
 
 			}
 
 		}
 
-		networkView.RPC("PostMessageRPC", RPCMode.All, message, sender, anonymously, allowRTF, visibleOnlyToSender);
+		GetComponent<NetworkView>().RPC("PostMessageRPC", RPCMode.All, message, sender, anonymously, allowRTF, visibleOnlyToSender);
 
 	}
 
@@ -401,7 +401,7 @@ public class Player : MonoBehaviour {
 
 	void OnGUI () {
 
-		if(!networkView.isMine)
+		if(!GetComponent<NetworkView>().isMine)
 			return;
 
 		GUI.skin = skin;
