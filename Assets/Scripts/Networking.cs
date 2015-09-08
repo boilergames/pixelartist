@@ -121,7 +121,7 @@ public class Networking : MonoBehaviour {
 
 			if(GUILayout.Button("Find Games"))
 			{
-				MasterServer.RequestHostList("boiler_pixelartist" + gameVersionID);
+				MasterServer.RequestHostList("jancc_pixelartist" + gameVersionID);
 				listServers = true;
 			}
 
@@ -149,7 +149,7 @@ public class Networking : MonoBehaviour {
 		GUILayout.FlexibleSpace();
 
 		GUILayout.Label("Copyright 2014 - 2015\n" +
-		                "Boiler Games");
+		                "jancc.de");
 
 		GUILayout.EndScrollView();
 		GUILayout.EndArea();
@@ -162,7 +162,7 @@ public class Networking : MonoBehaviour {
 		Network.incomingPassword = serverPassword;
 		Network.InitializeServer(serverPlayerCount, port, true);
 
-		MasterServer.RegisterHost("boiler_pixelartist" + gameVersionID, username + "'s game");
+		MasterServer.RegisterHost("jancc_pixelartist" + gameVersionID, username + "'s game");
 		waiting = true;
 
 	}
